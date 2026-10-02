@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { posts, type Post } from '../data/posts'
+import { posts, type Post } from '../utils/posts'
 
 const keyword = ref('')
 

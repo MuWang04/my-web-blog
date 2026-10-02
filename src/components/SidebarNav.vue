@@ -156,9 +156,9 @@ const onScroll = () => {
 
 const go = (href: string) => {
   closeMobileNav()
-  // 外部链接：新窗口打开
+  // 外部链接：当前窗口打开
   if (href.startsWith('http')) {
-    window.open(href, '_blank', 'noopener,noreferrer')
+    window.location.href = href
     return
   }
   if (href.startsWith('/')) {

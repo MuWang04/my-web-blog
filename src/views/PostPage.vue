@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { posts } from '../data/posts'
+import { getPostBySlug } from '../utils/posts'
 import { initReveal } from '../composables/useReveal'
 
 const route = useRoute()
 
 const post = computed(() => {
   const slug = route.params.slug as string
-  return posts.find((p) => p.slug === slug)
+  return getPostBySlug(slug)
 })
 
 onMounted(() => {
