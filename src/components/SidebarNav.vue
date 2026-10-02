@@ -154,6 +154,15 @@ const onScroll = () => {
   active.value = cur
 }
 
+// 侧边栏链接高亮判断：href 为 '/' 的首页链接在所有内部页面都高亮
+const isLinkActive = (href: string) => {
+  if (href.startsWith('/')) {
+    if (href === '/') return true // 博客首页链接：所有博客页面都高亮
+    return route.path === href.split('#')[0]
+  }
+  return href === '#' + active.value
+}
+
 const go = (href: string) => {
   closeMobileNav()
   // 外部链接：当前窗口打开
@@ -315,10 +324,7 @@ onBeforeUnmount(() => {
                   :href="child.href"
                   class="side-item side-submenu-item"
                   :class="{
-                    'is-active':
-                      child.href.startsWith('/')
-                        ? route.path === child.href.split('#')[0]
-                        : child.href === '#' + active,
+                    'is-active': isLinkActive(child.href),
                   }"
                   @click.prevent="go(child.href)"
                 >
@@ -333,10 +339,7 @@ onBeforeUnmount(() => {
             :href="item.href"
             class="side-item"
             :class="{
-              'is-active':
-                item.href.startsWith('/')
-                  ? route.path === item.href.split('#')[0]
-                  : item.href === '#' + active,
+              'is-active': isLinkActive(item.href),
             }"
             @click.prevent="go(item.href)"
           >

@@ -18,7 +18,7 @@ const filtered = computed(() => {
 })
 
 function goToPost(post: Post) {
-  router.push(`/post/${post.slug}`)
+  router.push(`/${post.slug}`)
 }
 </script>
 
@@ -61,7 +61,7 @@ function goToPost(post: Post) {
         v-for="post in filtered"
         :key="post.slug"
         class="post-card"
-        :href="`/blog/post/${post.slug}`"
+        :href="`/blog/${post.slug}`"
         @click.prevent="goToPost(post)"
       >
         <div class="post-meta">
@@ -164,16 +164,18 @@ function goToPost(post: Post) {
   display: flex;
   flex-direction: column;
   padding: 18px 20px;
-  background: var(--card-bg);
+  background: rgba(255, 255, 255, 0.028);
   border: 1px solid var(--card-border);
   border-radius: 14px;
   text-decoration: none;
+  backdrop-filter: blur(2px) saturate(1.15);
+  -webkit-backdrop-filter: blur(2px) saturate(1.15);
   transition: border-color 0.2s, transform 0.2s, background 0.2s;
 }
 
 .post-card:hover {
   border-color: rgba(45, 212, 191, 0.45);
-  background: var(--card-hover);
+  background: rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
 }
 
@@ -244,5 +246,13 @@ function goToPost(post: Post) {
   .card-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* 浅色模式毛玻璃 */
+html[data-theme='light'] .post-card {
+  background: rgba(255, 255, 255, 0.75);
+}
+html[data-theme='light'] .post-card:hover {
+  background: rgba(255, 255, 255, 0.9);
 }
 </style>

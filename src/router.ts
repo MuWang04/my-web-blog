@@ -19,7 +19,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/post/:slug',
+      path: '/:slug',
       name: 'post',
       component: PostPage,
       meta: {

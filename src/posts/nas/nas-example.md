@@ -7,7 +7,7 @@ description: 这是一篇放在 nas 子文件夹里的示例文章，演示如�
 
 ## 前言
 
-这篇文章放在 `src/posts/nas/` 子文件夹里，slug 会自动变成 `nas-nas-example`，访问地址是 `/blog/post/nas-nas-example`。
+这篇文章放在 `src/posts/nas/` 子文件夹里，slug 会自动变成 `nas-nas-example`，访问地址是 `/blog/nas-nas-example`。
 
 ## 如何添加图片
 

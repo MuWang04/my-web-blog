@@ -40,7 +40,7 @@ function goBack() {
 
 <template>
   <div class="app-shell">
-    <main>
+    <main class="main-glass">
       <div v-if="post" class="post-page" data-reveal>
         <!-- 返回按钮 -->
         <button class="back-btn" @click="goBack">
@@ -98,6 +98,8 @@ function goBack() {
 <style scoped>
 .app-shell {
   min-height: 100vh;
+  position: relative;
+  z-index: 2;
 }
 
 @media (min-width: 1200px) {
@@ -106,8 +108,15 @@ function goBack() {
   }
 }
 
+/* 整个内容区域：毛玻璃背景已移到 App.vue 独立层，这里只保留布局 */
+.main-glass {
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
 .post-page {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 96px 24px 64px;
 }
