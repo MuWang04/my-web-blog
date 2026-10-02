@@ -26,7 +26,7 @@ export const site = {
     {
       title: '主页区',
       items: [
-        { label: '首页', icon: '🏠', href: '/' },
+        { label: '首页', icon: '🏠', href: `${MAIN}/` },
         { label: '关于', icon: '🪪', href: `${MAIN}/homepage` },
         { label: '技能', icon: '🪛', href: `${MAIN}/homepage` },
         { label: '博客', icon: '📝', href: '/' },
