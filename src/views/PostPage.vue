@@ -1,22 +1,40 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getPostBySlug } from '../utils/posts'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getPostBySlug, renderPostContent } from '../utils/posts'
 import { initReveal } from '../composables/useReveal'
 
 const route = useRoute()
+const router = useRouter()
 
 const post = computed(() => {
   const slug = route.params.slug as string
   return getPostBySlug(slug)
 })
 
+const renderedContent = ref('')
+const loading = ref(false)
+
+async function loadContent() {
+  if (!post.value) {
+    renderedContent.value = ''
+    return
+  }
+  loading.value = true
+  renderedContent.value = await renderPostContent(post.value)
+  loading.value = false
+}
+
+watch(() => route.params.slug, () => {
+  loadContent()
+}, { immediate: true })
+
 onMounted(() => {
   initReveal()
 })
 
 function goBack() {
-  window.location.href = '/'
+  router.push('/')
 }
 </script>
 
@@ -63,7 +81,8 @@ function goBack() {
         </div>
 
         <!-- 文章正文 -->
-        <div class="post-content" v-html="post.content"></div>
+        <div v-if="loading" class="post-loading">正在加载文章...</div>
+        <div v-else class="post-content" v-html="renderedContent"></div>
       </div>
 
       <!-- 文章不存在 -->
@@ -168,6 +187,14 @@ function goBack() {
   color: var(--accent);
   background: rgba(45, 212, 191, 0.12);
   border-radius: 999px;
+}
+
+/* 文章加载中 */
+.post-loading {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
 /* 文章正文 */

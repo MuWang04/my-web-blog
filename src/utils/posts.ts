@@ -1,5 +1,3 @@
-import MarkdownIt from 'markdown-it'
-
 export interface Post {
   slug: string
   title: string
@@ -7,23 +5,17 @@ export interface Post {
   words: number
   description: string
   tags: string[]
-  content: string
+  rawContent: string  // 原始 Markdown，不预先渲染
 }
 
-// 用 import.meta.glob 在构建时把所有 .md 文件作为原始字符串导入
-const mdModules = import.meta.glob('../posts/*.md', {
+// 用 import.meta.glob 在构建时把所有 .md 文件作为原始字符串导入（支持子文件夹分类）
+const mdModules = import.meta.glob('../posts/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 }) as Record<string, string>
 
-const md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true,
-})
-
-// 简单的 frontmatter 解析（不依赖 gray-matter，避免浏览器兼容问题）
+// 简单的 frontmatter 解析
 function parseFrontmatter(raw: string): { data: Record<string, any>; content: string } {
   const match = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/)
   if (!match) {
@@ -38,7 +30,6 @@ function parseFrontmatter(raw: string): { data: Record<string, any>; content: st
     const key = line.slice(0, colonIndex).trim()
     let value: any = line.slice(colonIndex + 1).trim()
 
-    // 解析数组：[标签1, 标签2]
     if (value.startsWith('[') && value.endsWith(']')) {
       value = value
         .slice(1, -1)
@@ -53,33 +44,43 @@ function parseFrontmatter(raw: string): { data: Record<string, any>; content: st
   return { data, content: match[2] }
 }
 
-// 统计纯文本字数（去掉 HTML 标签和空白）
-function countWords(html: string): number {
-  const text = html.replace(/<[^>]*>/g, '').replace(/\s+/g, '')
+// 统计纯文本字数（去掉 Markdown 语法符号）
+function countWords(markdown: string): number {
+  const text = markdown
+    .replace(/^#{1,6}\s+/gm, '')       // 标题
+    .replace(/\*\*(.+?)\*\*/g, '$1')    // 加粗
+    .replace(/\*(.+?)\*/g, '$1')        // 斜体
+    .replace(/`[^`]+`/g, '')            // 行内代码
+    .replace(/```[\s\S]*?```/g, '')     // 代码块
+    .replace(/!\[.*?\]\(.*?\)/g, '')    // 图片
+    .replace(/\[(.+?)\]\(.*?\)/g, '$1') // 链接
+    .replace(/^[-*+]\s+/gm, '')          // 列表
+    .replace(/^>\s+/gm, '')              // 引用
+    .replace(/<[^>]*>/g, '')             // HTML 标签
+    .replace(/\s+/g, '')
   return text.length
 }
 
-// 解析所有文章
+// 解析所有文章（不渲染 Markdown，只解析 frontmatter）
 function parsePosts(): Post[] {
   const posts: Post[] = []
 
   for (const [path, raw] of Object.entries(mdModules)) {
     // 从路径提取 slug：../posts/hello-world.md → hello-world
-    const slug = path.split('/').pop()?.replace(/\.md$/, '') || ''
+    // 子文件夹：../posts/nas/my-post.md → nas-my-post
+    const slug = path.replace('../posts/', '').replace(/\.md$/, '').replace(/\//g, '-')
     if (!slug) continue
 
-    // 解析 frontmatter 和正文
     const { data, content } = parseFrontmatter(raw)
-    const html = md.render(content)
 
     posts.push({
       slug,
       title: data.title || slug,
       date: data.date || '',
-      words: countWords(html),
+      words: countWords(content),
       description: data.description || content.replace(/\s+/g, ' ').slice(0, 80) + '...',
       tags: Array.isArray(data.tags) ? data.tags : [],
-      content: html,
+      rawContent: content,
     })
   }
 
@@ -91,4 +92,19 @@ export const posts: Post[] = parsePosts()
 
 export function getPostBySlug(slug: string): Post | undefined {
   return posts.find((p) => p.slug === slug)
+}
+
+// 动态导入 markdown-it 并渲染文章正文（只在详情页调用）
+let mdRenderer: any = null
+
+export async function renderPostContent(post: Post): Promise<string> {
+  if (!mdRenderer) {
+    const MarkdownIt = (await import('markdown-it')).default
+    mdRenderer = new MarkdownIt({
+      html: true,
+      linkify: true,
+      typographer: true,
+    })
+  }
+  return mdRenderer.render(post.rawContent)
 }

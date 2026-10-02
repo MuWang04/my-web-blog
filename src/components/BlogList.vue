@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { posts, type Post } from '../utils/posts'
 
+const router = useRouter()
 const keyword = ref('')
 
 const filtered = computed(() => {
   const q = keyword.value.trim().toLowerCase()
   if (!q) return posts
   return posts.filter((p) => {
-    const hay = [p.title, p.description, p.tags.join(' '), p.content]
+    const hay = [p.title, p.description, p.tags.join(' '), p.rawContent]
       .join(' ')
       .toLowerCase()
     return hay.includes(q)
@@ -16,7 +18,7 @@ const filtered = computed(() => {
 })
 
 function goToPost(post: Post) {
-  window.location.href = `/post/${post.slug}`
+  router.push(`/post/${post.slug}`)
 }
 </script>
 
@@ -59,7 +61,7 @@ function goToPost(post: Post) {
         v-for="post in filtered"
         :key="post.slug"
         class="post-card"
-        :href="`/post/${post.slug}`"
+        :href="`/blog/post/${post.slug}`"
         @click.prevent="goToPost(post)"
       >
         <div class="post-meta">
