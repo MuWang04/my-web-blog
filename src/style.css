@@ -1,0 +1,546 @@
+/* ============================================================
+   个人网站全局样式 —— 设计系统
+   深色科技风 · 鸿蒙字体优先 · Mushroom 卡片 · 响应式
+   ============================================================ */
+
+/* ---------- 鸿蒙字体（本地资源 public/fonts/） ---------- */
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('/fonts/HarmonyOS_Sans_SC_Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('/fonts/HarmonyOS_Sans_SC_Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('/fonts/HarmonyOS_Sans_SC_Bold.woff2') format('woff2');
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- 主题切换圆形动画（对齐 Element Plus 官网的纯 CSS 方案） ----------
+   动画由 html[data-theme-transition] 属性 + @keyframes 驱动，
+   过渡伪元素创建第一帧即生效，Edge/Chrome 都不会先闪整屏。 */
+@keyframes theme-change {
+  0% {
+    clip-path: circle(
+      var(--theme-transition-radius) at var(--theme-transition-x) var(--theme-transition-y)
+    );
+  }
+  100% {
+    clip-path: circle(0% at var(--theme-transition-x) var(--theme-transition-y));
+  }
+}
+
+::view-transition-new(root),
+::view-transition-old(root) {
+  /* 关闭默认淡入淡出，改用 clip-path 圆形裁剪动画 */
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2147483646;
+}
+
+/* 切到深色：旧浅色层在上，正向播放（半径满→0，圆形收起）*/
+html[data-theme-transition='to-dark']::view-transition-old(root) {
+  z-index: 2147483646;
+  animation: 0.4s ease-in 0s normal both theme-change;
+}
+html[data-theme-transition='to-dark']::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* 切到浅色：新浅色层在上，反向播放（半径 0→满，圆形展开）*/
+html[data-theme-transition='to-light']::view-transition-old(root) {
+  z-index: 1;
+}
+html[data-theme-transition='to-light']::view-transition-new(root) {
+  z-index: 2147483646;
+  animation: 0.4s ease-in 0s reverse both theme-change;
+}
+
+/* 动画期间的截图层不拦截鼠标点击，允许连续点击立即触发下一次切换 */
+::view-transition,
+::view-transition-new(root),
+::view-transition-old(root),
+::view-transition-group(root),
+::view-transition-image-pair(root) {
+  pointer-events: none;
+}
+
+:root {
+  /* 色彩 */
+  --bg: #0a0e13;
+  --bg-soft: #0f151c;
+  --bg-grid: rgba(148, 184, 207, 0.06);
+  --bg-grid-soft: rgba(148, 184, 207, 0.03);
+  --card: rgba(255, 255, 255, 0.028);
+  --card-hover: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-strong: rgba(255, 255, 255, 0.14);
+  --text: #e9eef3;
+  --text-dim: #9aa8b5;
+  --text-faint: #64707d;
+  --accent: #2dd4bf;
+  --accent-soft: rgba(45, 212, 191, 0.14);
+  --accent-2: #f5b942;
+  --danger: #f87171;
+
+  /* 卡片鼠标跟随光斑（深色主题） */
+  --spot-glow: rgba(45, 212, 191, 0.1);
+  --spot-ring: rgba(45, 212, 191, 0.55);
+
+  /* 字体：鸿蒙优先，回退系统字体 */
+  --font: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'MiSans', system-ui,
+    -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, 'Courier New',
+    monospace;
+
+  /* 尺寸 */
+  --radius: 18px;
+  --radius-sm: 12px;
+  --nav-h: 64px;
+  --container: 1120px;
+  --sidebar-w: 280px;
+
+  /* 阴影 */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 32px -12px rgba(0, 0, 0, 0.55);
+  --shadow-float: 0 24px 48px -16px rgba(0, 0, 0, 0.6),
+    0 0 0 1px var(--card-border-strong);
+
+  /* 透明白色覆盖层（浅色主题下自动换为深色半透明） */
+  --white-03: rgba(255, 255, 255, 0.03);
+  --white-04: rgba(255, 255, 255, 0.04);
+  --white-06: rgba(255, 255, 255, 0.06);
+  --white-07: rgba(255, 255, 255, 0.07);
+  --white-08: rgba(255, 255, 255, 0.08);
+  --sidebar-bg: rgba(10, 14, 19, 0.5);
+
+  color-scheme: dark;
+}
+
+/* ============================================================
+   浅色主题
+   ============================================================ */
+html[data-theme='light'] {
+  --bg: #f2f5f9;
+  --bg-soft: #ffffff;
+  --bg-grid: rgba(20, 45, 70, 0.05);
+  --bg-grid-soft: rgba(20, 45, 70, 0.025);
+  --card: rgba(255, 255, 255, 0.75);
+  --card-hover: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(15, 35, 55, 0.1);
+  --card-border-strong: rgba(15, 35, 55, 0.18);
+  --text: #17202e;
+  --text-dim: #45566a;
+  --text-faint: #6b7c90;
+  --accent: #0d9488;
+  --accent-soft: rgba(13, 148, 136, 0.12);
+  --accent-2: #b45309;
+  --danger: #dc2626;
+
+  /* 卡片鼠标跟随光斑（浅色主题） */
+  --spot-glow: rgba(13, 148, 136, 0.1);
+  --spot-ring: rgba(13, 148, 136, 0.5);
+
+  --white-03: rgba(15, 35, 55, 0.03);
+  --white-04: rgba(15, 35, 55, 0.05);
+  --white-06: rgba(15, 35, 55, 0.07);
+  --white-07: rgba(15, 35, 55, 0.09);
+  --white-08: rgba(15, 35, 55, 0.12);
+  --sidebar-bg: rgba(255, 255, 255, 0.78);
+
+  --shadow-card: 0 1px 2px rgba(15, 35, 55, 0.06),
+    0 12px 32px -12px rgba(15, 35, 55, 0.18);
+  --shadow-float: 0 24px 48px -16px rgba(15, 35, 55, 0.22),
+    0 0 0 1px var(--card-border-strong);
+
+  color-scheme: light;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + 12px);
+  /* 默认不预留滚动条槽：一屏能显示完的短页面不出现滚动条；
+     只有内容确实超高（<html class="has-scroll">）时才预留，
+     避免长页面滚动条出现瞬间内容横向位移 */
+  scrollbar-gutter: auto;
+  /* 兜底底色，避免滚动条槽 / 边缘露出浏览器默认白底 */
+  background: var(--bg);
+}
+
+html.has-scroll {
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 17px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* 禁止长按选择文字 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* 禁止 iOS 长按弹出选择/保存菜单 */
+  -webkit-touch-callout: none;
+}
+
+/* 禁止长按/拖拽保存图片 */
+img,
+svg,
+a img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+/* 禁止链接长按拖拽（拖动链接会弹出地址或新窗口） */
+a,
+a img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* 隐藏浏览器自带滚动条（仍可正常滚动，仅不显示滚动条） */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 旧版 Edge / IE */
+}
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none; /* Chrome / Edge / Safari */
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* ---------- 布局 ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding: 32px 0;
+  position: relative;
+}
+
+/* 页面第一个区块顶部补偿固定导航栏高度，避免内容被遮挡 */
+.app-shell main > .section:first-child {
+  padding-top: calc(var(--nav-h) + 32px);
+}
+
+.section-head {
+  margin-bottom: 28px;
+}
+
+.section-kicker {
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-kicker::before {
+  content: '';
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* 内页英文小标题（.page-kicker）前同样加渐变横杠，样式与首页一致 */
+.page-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-kicker::before {
+  content: '';
+  flex-shrink: 0;
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+.section-title {
+  font-size: clamp(28px, 4.5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.section-sub {
+  color: var(--text-dim);
+  margin-top: 12px;
+  max-width: 640px;
+  font-size: 16px;
+}
+
+/* ---------- Mushroom 卡片 ---------- */
+.card {
+  position: relative;
+  isolation: isolate; /* 让负 z-index 的光斑层留在卡片背景之上、内容之下 */
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(2px) saturate(1.15);
+  -webkit-backdrop-filter: blur(2px) saturate(1.15);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s, background 0.35s, box-shadow 0.35s;
+}
+
+/* ---------- 卡片鼠标光斑（spotlight） ----------
+   两个注入层（见 composables/useSpotlight.ts）：
+   .spot-glow 内部柔光（在内容之下，不挡文字）；
+   .spot-ring 跟随光标的 1px 渐变描边（内部挖空，只显边缘）。 */
+.card > .spot-glow,
+.card > .spot-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.card > .spot-glow {
+  z-index: -1;
+  background: radial-gradient(
+    420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    var(--spot-glow),
+    transparent 60%
+  );
+}
+
+.card > .spot-ring {
+  z-index: 3;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    var(--spot-ring),
+    transparent 62%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.card.is-spotlight > .spot-glow,
+.card.is-spotlight > .spot-ring {
+  opacity: 1;
+}
+
+/* ---------- 按钮（全局共用） ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-size: 20px;
+  font-weight: 600;
+  transition: transform 0.25s, box-shadow 0.25s, background 0.25s,
+    border-color 0.25s;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent), #0ea5a0);
+  color: #04211d;
+  box-shadow: 0 8px 24px -8px rgba(45, 212, 191, 0.55);
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -8px rgba(45, 212, 191, 0.6);
+}
+
+.btn--ghost {
+  border: 1px solid var(--card-border-strong);
+  color: var(--text);
+  background: var(--white-03);
+}
+
+.btn--ghost:hover {
+  transform: translateY(-2px);
+  background: var(--white-07);
+  border-color: var(--accent);
+}
+
+/* ---------- 路由页面切换动画 ---------- */
+.page-enter-active {
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform, filter;
+}
+
+.page-leave-active {
+  transition: opacity 0.24s ease,
+    transform 0.24s ease,
+    filter 0.24s ease;
+  will-change: opacity, transform, filter;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(22px) scale(0.99);
+  filter: blur(6px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.995);
+  filter: blur(4px);
+}
+
+/* ---------- 滚动渐显 ---------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 全局兜底：所有动画 / 过渡瞬时完成（颜色仍切换，仅去掉运动） */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+  [data-reveal] {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+  .type-cursor {
+    animation: none;
+  }
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
+  .page-enter-from,
+  .page-leave-to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 860px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .section {
+    padding: 52px 0;
+  }
+
+  .section-head {
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-size: clamp(24px, 7vw, 32px);
+  }
+
+  .section-sub {
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 11px 22px;
+    font-size: 16px;
+  }
+
+  .app-shell main > .section:first-child {
+    padding-top: calc(var(--nav-h) + 20px);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 14px;
+  }
+}
